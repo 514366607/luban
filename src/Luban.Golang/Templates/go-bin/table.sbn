@@ -7,13 +7,21 @@ package {{__top_module}};
     key_type = __this.key_ttype
     value_type =  __this.value_ttype
     index_field = __this.index_field
+
+if __this.is_map_table
+    if key_type.is_enum
+        key_type_str = index_field.type
+    else
+        key_type_str = declaring_type_name key_type
+    end
+end
 ~}}
 
 import "{{__luban_module_name}}"
 
 {{~if __this.is_map_table~}}
 type {{go_full_name}} struct {
-    _dataMap map[{{declaring_type_name key_type}}]{{declaring_type_name value_type}}
+    _dataMap map[{{key_type_str}}]{{declaring_type_name value_type}}
     _dataList []{{declaring_type_name value_type}}
 }
 
@@ -22,7 +30,7 @@ func New{{go_full_name}}(_buf *luban.ByteBuf) (*{{go_full_name}}, error) {
 		return nil, err
 	} else {
 		_dataList := make([]{{declaring_type_name value_type}}, 0, size)
-		dataMap := make(map[{{declaring_type_name key_type}}]{{declaring_type_name value_type}})
+		dataMap := make(map[{{key_type_str}}]{{declaring_type_name value_type}})
 
 		for i := 0 ; i < size ; i++ {
 			if _v, err2 := New{{full_name value_type.def_bean}}(_buf); err2 != nil {
@@ -45,7 +53,7 @@ func New{{go_full_name}}(_buf *luban.ByteBuf) (*{{go_full_name}}, error) {
 	}
 }
 
-func (table *{{go_full_name}}) GetDataMap() map[{{declaring_type_name key_type}}]{{declaring_type_name value_type}} {
+func (table *{{go_full_name}}) GetDataMap() map[{{key_type_str}}]{{declaring_type_name value_type}} {
     return table._dataMap
 }
 
@@ -53,7 +61,7 @@ func (table *{{go_full_name}}) GetDataList() []{{declaring_type_name value_type}
     return table._dataList
 }
 
-func (table *{{go_full_name}}) Get(key {{declaring_type_name key_type}}) {{declaring_type_name value_type}} {
+func (table *{{go_full_name}}) Get(key {{key_type_str}}) {{declaring_type_name value_type}} {
     return table._dataMap[key]
 }
 
